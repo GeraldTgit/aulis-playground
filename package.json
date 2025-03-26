@@ -11,7 +11,7 @@
     "react-dom": "^19.0.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
-    "homepage": "https://GeraldTgit.github.io/Auli-Playground"
+    "homepage": "https://GeraldTgit.github.io/aulis-playground"
   },
   "scripts": {
     "start": "react-scripts start",

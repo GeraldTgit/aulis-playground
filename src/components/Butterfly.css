@@ -1,0 +1,23 @@
+.butterfly-container {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.butterfly {
+  position: absolute;
+  width: 100px; /* Adjust the size of the butterfly */
+  height: 100px; /* Adjust the size of the butterfly */
+  transition: left 2s ease-in-out, top 2s ease-in-out; /* Smooth transition */
+}
+
+.butterfly.moving-to-corner {
+  transition: left 2s ease-in-out, top 2s ease-in-out; /* Smooth transition to corner */
+}
+
+.cartoon_butterfly {
+  position: absolute;
+  width: 50px; /* Adjust the size of the butterfly */
+  height: 50px; /* Adjust the size of the butterfly */
+}

@@ -10,7 +10,11 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "homepage": "https://github.com/GeraldTgit/Auli-Playground.git",
+    "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }

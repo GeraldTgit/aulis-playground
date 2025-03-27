@@ -13,17 +13,32 @@ const DraggableNet = forwardRef(({ butterflyRef, onCatch }, ref) => {
   const [direction, setDirection] = useState('right');
   const netRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
-  const dimensions = { width: 200, height: 200 };
+  const dimensions = useRef({
+    width: window.innerWidth < 768 ? 120 : 200,
+    height: window.innerWidth < 768 ? 120 : 200
+  });
 
   useImperativeHandle(ref, () => ({
     getElement: () => netRef.current
   }));
 
   useEffect(() => {
-    const centerX = window.innerWidth / 2 - dimensions.width / 2;
-    const centerY = window.innerHeight / 2 - dimensions.height / 2;
+    const handleResize = () => {
+      dimensions.current = {
+        width: window.innerWidth < 768 ? 120 : 200,
+        height: window.innerWidth < 768 ? 120 : 200
+      };
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const centerX = window.innerWidth / 2 - dimensions.current.width / 2;
+    const centerY = window.innerHeight / 2 - dimensions.current.height / 2;
     setPosition({ x: centerX, y: centerY });
-  }, [dimensions.width, dimensions.height]);
+  }, [dimensions.current.width, dimensions.current.height]);
 
   const checkCollision = useCallback(() => {
     if (!butterflyRef?.current || !netRef.current) return false;
@@ -56,32 +71,17 @@ const DraggableNet = forwardRef(({ butterflyRef, onCatch }, ref) => {
     return isColliding;
   }, [butterflyRef, position]);
 
-  useEffect(() => {
-    if (!isDragging) return;
+  const handleMove = useCallback((clientX, clientY) => {
+    const newX = clientX - offsetRef.current.x;
+    const newY = clientY - offsetRef.current.y;
+    
+    setDirection(newX > position.x ? 'right' : 'left');
+    setPosition({ x: newX, y: newY });
 
-    const handleMouseMove = (e) => {
-      const newX = e.clientX - offsetRef.current.x;
-      const newY = e.clientY - offsetRef.current.y;
-      
-      setDirection(newX > position.x ? 'right' : 'left');
-      setPosition({ x: newX, y: newY });
-
-      // Check for collision on every move
-      if (checkCollision()) {
-        onCatch();
-      }
-    };
-
-    const handleMouseUp = () => setIsDragging(false);
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, position.x, checkCollision, onCatch]);
+    if (checkCollision()) {
+      onCatch();
+    }
+  }, [position.x, checkCollision, onCatch]);
 
   const handleMouseDown = useCallback((e) => {
     setIsDragging(true);
@@ -92,6 +92,42 @@ const DraggableNet = forwardRef(({ butterflyRef, onCatch }, ref) => {
     };
   }, []);
 
+  const handleTouchStart = useCallback((e) => {
+    setIsDragging(true);
+    const touch = e.touches[0];
+    const rect = netRef.current.getBoundingClientRect();
+    offsetRef.current = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    handleMove(touch.clientX, touch.clientY);
+  }, [isDragging, handleMove]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    const handleMouseUp = () => setIsDragging(false);
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isDragging, handleMove, handleTouchMove]);
+
   const netImage = direction === 'left' 
     ? `${process.env.PUBLIC_URL}/images/catching_net_left.png`
     : `${process.env.PUBLIC_URL}/images/catching_net_right.png`;
@@ -101,18 +137,20 @@ const DraggableNet = forwardRef(({ butterflyRef, onCatch }, ref) => {
       ref={netRef}
       src={netImage}
       alt="Catching net"
-      style={{
+      style={{ 
         position: 'absolute',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: `${dimensions.width}px`,
-        height: `${dimensions.height}px`,
+        width: `${dimensions.current.width}px`,
+        height: `${dimensions.current.height}px`,
         cursor: isDragging ? 'grabbing' : 'grab',
         zIndex: 20,
         userSelect: 'none',
+        touchAction: 'none',
         transition: 'transform 0.1s ease'
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     />
   );
 });

@@ -52,13 +52,13 @@ function App() {
 
   return (
     <div className="App">
+      <div className="cartoon_butterfly"></div>
       <div 
         className="cage" 
         ref={cageRef}
         onClick={releaseButterflies}
         style={{ cursor: 'pointer' }}
-        ><div className="cartoon_butterfly"></div>
-        </div>
+        ></div>
       <div className="butterfly-counter">
         <span className="counter-number">{caughtCount}</span>
         <span className="counter-label">Butterflies Caught</span>

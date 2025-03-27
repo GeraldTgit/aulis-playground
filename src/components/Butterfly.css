@@ -3,21 +3,35 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
+  touch-action: none; /* Prevent browser touch actions */
 }
 
 .butterfly {
   position: absolute;
-  width: 100px; /* Adjust the size of the butterfly */
-  height: 100px; /* Adjust the size of the butterfly */
-  transition: left 2s ease-in-out, top 2s ease-in-out; /* Smooth transition */
+  width: 60px; /* Smaller for mobile */
+  height: 60px; /* Smaller for mobile */
+  transition: left 2s ease-in-out, top 2s ease-in-out;
 }
 
 .butterfly.moving-to-corner {
-  transition: left 2s ease-in-out, top 2s ease-in-out; /* Smooth transition to corner */
+  transition: left 2s ease-in-out, top 2s ease-in-out;
 }
 
 .cartoon_butterfly {
   position: absolute;
-  width: 50px; /* Adjust the size of the butterfly */
-  height: 50px; /* Adjust the size of the butterfly */
+  width: 40px; /* Smaller for mobile */
+  height: 40px; /* Smaller for mobile */
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .butterfly {
+    width: 50px;
+    height: 50px;
+  }
+
+  .cartoon_butterfly {
+    width: 30px;
+    height: 30px;
+  }
 }

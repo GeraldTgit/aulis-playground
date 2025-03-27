@@ -16,6 +16,7 @@ const Butterfly = forwardRef(({ initialPosition }, ref) => {
   const velocityRef = useRef({ x: 2, y: 1 });
   const scaleRef = useRef(1);
   const scaleDirectionRef = useRef(1);
+  const isMobile = window.innerWidth <= 768;
 
   useImperativeHandle(ref, () => ({
     getPosition: () => positionRef.current,
@@ -28,16 +29,16 @@ const Butterfly = forwardRef(({ initialPosition }, ref) => {
     
     if (!initialPosition) {
       positionRef.current = {
-        x: Math.random() * (window.innerWidth - 100),
-        y: Math.random() * (window.innerHeight - 100)
+        x: Math.random() * (window.innerWidth - (isMobile ? 60 : 100)),
+        y: Math.random() * (window.innerHeight - (isMobile ? 60 : 100))
       };
     }
     
     velocityRef.current = {
-      x: (Math.random() - 0.5) * 4,
-      y: (Math.random() - 0.5) * 4
+      x: (Math.random() - 0.5) * (isMobile ? 3 : 4),
+      y: (Math.random() - 0.5) * (isMobile ? 3 : 4)
     };
-  }, [initialPosition]);
+  }, [initialPosition, isMobile]);
 
   useEffect(() => {
     resetButterfly();
@@ -65,10 +66,10 @@ const Butterfly = forwardRef(({ initialPosition }, ref) => {
       }
 
       if (Math.random() < 0.02) {
-        velocityRef.current.x = (Math.random() - 0.5) * 4;
+        velocityRef.current.x = (Math.random() - 0.5) * (isMobile ? 3 : 4);
       }
       if (Math.random() < 0.02) {
-        velocityRef.current.y = (Math.random() - 0.5) * 4;
+        velocityRef.current.y = (Math.random() - 0.5) * (isMobile ? 3 : 4);
       }
 
       scaleDirectionRef.current *= -0.95;
@@ -91,7 +92,7 @@ const Butterfly = forwardRef(({ initialPosition }, ref) => {
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [butterflyImage]);
+  }, [butterflyImage, isMobile]);
 
   if (!butterflyImage) return null;
 
@@ -104,12 +105,13 @@ const Butterfly = forwardRef(({ initialPosition }, ref) => {
         position: 'fixed',
         left: 0,
         top: 0,
-        width: '100px',
+        width: isMobile ? '60px' : '100px',
         height: 'auto',
         zIndex: 10,
         pointerEvents: 'none',
         transition: 'transform 0.1s ease-out',
-        transform: 'translate(0, 0)'
+        transform: 'translate(0, 0)',
+        touchAction: 'none'
       }}
     />
   );

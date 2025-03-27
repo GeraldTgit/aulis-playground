@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import './App.css';
 import DraggableNet from './components/DraggableNet';
 import Butterfly from './components/Butterfly';
@@ -8,9 +8,20 @@ function App() {
   const [caughtCount, setCaughtCount] = useState(0);
   const [butterflyKey, setButterflyKey] = useState(0);
   const [releasedButterflies, setReleasedButterflies] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
   const butterflyRef = useRef(null);
   const netRef = useRef(null);
   const cageRef = useRef(null);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   const handleCatch = useCallback(() => {
     if (!showPopup) {
@@ -30,14 +41,14 @@ function App() {
     for (let i = 0; i < caughtCount; i++) {
       newButterflies.push({
         id: Date.now() + i,
-        x: window.innerWidth - 100, // Start from right side (near cage)
-        y: window.innerHeight - 100 // Start from bottom (near cage)
+        x: window.innerWidth - (isMobile ? 80 : 100),
+        y: window.innerHeight - (isMobile ? 80 : 100)
       });
     }
     
     setReleasedButterflies(newButterflies);
-    setCaughtCount(0); // Reset counter after release
-  }, [caughtCount]);
+    setCaughtCount(0);
+  }, [caughtCount, isMobile]);
 
   return (
     <div className="App">

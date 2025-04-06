@@ -12,6 +12,63 @@
   touch-action: manipulation; /* Improve touch responsiveness */
 }
 
+.top-left-label {
+  position: fixed;
+  top: 2rem;
+  left: 1rem;
+  background-color: transparent;
+  color: #f065b6;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.top-left-label2 {
+  position: fixed;
+  top: 5rem;
+  left: 2rem;
+  background-color: transparent;
+  color: #f065b6;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.players-list {
+  position: fixed;
+  top: 7rem;
+  left: 2rem;
+  background-color: transparent;
+  color: #040404;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.player-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;
+}
+
+.players {
+  padding: 0.2rem 0.5rem;
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+  .players {
+    top: 4rem;
+    left: 1rem;
+    font-size: 0.5rem;
+  }
+}
+
 .cage {
   background-image: url("/public/images/cage.png");
   background-size: contain;

@@ -9,9 +9,28 @@ function App() {
   const [butterflyKey, setButterflyKey] = useState(0);
   const [releasedButterflies, setReleasedButterflies] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [players, setPlayers] = useState([]); // State to store player data
   const butterflyRef = useRef(null);
   const netRef = useRef(null);
   const cageRef = useRef(null);
+
+  // Fetch players' data from the backend
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Fetched data:', data);  // Log the data to check the structure
+        setPlayers(data.data); // Set the player data in state
+      } catch (error) {
+        console.error('Error fetching player data:', error);
+      }
+    };
+    fetchPlayers();
+  }, []);
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -52,13 +71,15 @@ function App() {
 
   return (
     <div className="App">
+      <div className="top-left-label">Auli's Playmates</div>
+      <div className="top-left-label2">Top 10 butterfly catchers yey!</div>
       <div className="cartoon_butterfly"></div>
       <div 
         className="cage" 
         ref={cageRef}
         onClick={releaseButterflies}
         style={{ cursor: 'pointer' }}
-        ></div>
+      ></div>
       <div className="butterfly-counter">
         <span className="counter-number">{caughtCount}</span>
         <span className="counter-label">Butterflies Caught</span>
@@ -88,6 +109,21 @@ function App() {
         butterflyRef={butterflyRef} 
         onCatch={handleCatch} 
       />
+
+      {/* Display player data */}
+      <div className="players-list">
+        <div className="player-data">
+          {players.length === 0 ? (
+            <p>Loading player data...</p>
+          ) : (
+            players.map((player, index) => (
+              <div key={index} className="players">
+                {player.username} — {player.caught_butterflies} <span role="img" aria-label="butterflies">🦋</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

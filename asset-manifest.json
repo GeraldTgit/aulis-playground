@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/aulis-playground/static/css/main.91734c9e.css",
-    "main.js": "/aulis-playground/static/js/main.1a11fd7b.js",
+    "main.css": "/aulis-playground/static/css/main.dab4db66.css",
+    "main.js": "/aulis-playground/static/js/main.7f561351.js",
     "static/js/453.c5aa600d.chunk.js": "/aulis-playground/static/js/453.c5aa600d.chunk.js",
     "static/media/cage.png": "/aulis-playground/static/media/cage.056f1f6c53efd6dab779.png",
     "static/media/garden.png": "/aulis-playground/static/media/garden.2a4439ec32ddefd1eccf.png",
     "static/media/butterfly.png": "/aulis-playground/static/media/butterfly.18f91f0156217c349013.png",
     "index.html": "/aulis-playground/index.html",
-    "main.91734c9e.css.map": "/aulis-playground/static/css/main.91734c9e.css.map",
-    "main.1a11fd7b.js.map": "/aulis-playground/static/js/main.1a11fd7b.js.map",
+    "main.dab4db66.css.map": "/aulis-playground/static/css/main.dab4db66.css.map",
+    "main.7f561351.js.map": "/aulis-playground/static/js/main.7f561351.js.map",
     "453.c5aa600d.chunk.js.map": "/aulis-playground/static/js/453.c5aa600d.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.91734c9e.css",
-    "static/js/main.1a11fd7b.js"
+    "static/css/main.dab4db66.css",
+    "static/js/main.7f561351.js"
   ]
 }

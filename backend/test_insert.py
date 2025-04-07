@@ -1,33 +1,100 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from dotenv import load_dotenv
 import os
+from pydantic import BaseModel
+from typing import List
 
 load_dotenv()
 
-conn = psycopg2.connect(
-    user=os.getenv("user"),
-    password=os.getenv("password"),
-    host=os.getenv("host"),
-    port=os.getenv("port"),
-    dbname=os.getenv("dbname")
+app = FastAPI()
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React's default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-cur = conn.cursor()
+class SessionData(BaseModel):
+    username: str
+    caught_butterflies: int
 
-cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM sessions;")
-next_id = cur.fetchone()[0]
-print("Next ID:", next_id)
+class Player(BaseModel):
+    username: str
+    caught_butterflies: int
 
-cur.execute("""
-    INSERT INTO sessions (id, username, caught_butterflies, session_dt)
-    VALUES (%s, %s, %s, NOW())
-""", (next_id, 'Raven', 2))
+def get_db_connection():
+    return psycopg2.connect(
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME")
+    )
 
-conn.commit()
-print("Inserted.")
+@app.get("/", response_model=List[Player])
+async def get_players():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT username, caught_butterflies 
+            FROM sessions 
+            ORDER BY caught_butterflies DESC 
+            LIMIT 10
+        """)
+        players = cur.fetchall()
+        return [{"username": row[0], "caught_butterflies": row[1]} for row in players]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()
 
-cur.execute("SELECT * FROM sessions WHERE id = %s;", (next_id,))
-print("Inserted row:", cur.fetchone())
-
-cur.close()
-conn.close()
+@app.post("/save-session")
+async def save_session(session_data: SessionData):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get next ID
+        cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM sessions;")
+        next_id = cur.fetchone()[0]
+        
+        # Insert new session
+        cur.execute("""
+            INSERT INTO sessions (id, username, caught_butterflies, session_dt)
+            VALUES (%s, %s, %s, NOW())
+            RETURNING id
+        """, (next_id, session_data.username, session_data.caught_butterflies))
+        
+        inserted_id = cur.fetchone()[0]
+        conn.commit()
+        
+        # Return the updated leaderboard
+        cur.execute("""
+            SELECT username, caught_butterflies 
+            FROM sessions 
+            ORDER BY caught_butterflies DESC 
+            LIMIT 10
+        """)
+        players = cur.fetchall()
+        
+        return {
+            "message": "Session saved successfully",
+            "id": inserted_id,
+            "leaderboard": [{"username": row[0], "caught_butterflies": row[1]} for row in players]
+        }
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()

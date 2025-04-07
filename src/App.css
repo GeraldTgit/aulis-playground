@@ -12,9 +12,54 @@
   touch-action: manipulation; /* Improve touch responsiveness */
 }
 
+.editable-label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 2rem;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  padding: 8px 16px;
+  border: 2px solid #ff9800;
+  border-radius: 2rem;
+
+  background-color: rgba(255, 255, 255, 0.7); /* Optional soft background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional soft shadow */
+}
+
+.editable-input {
+  border: none;
+  border-bottom: 1px solid rgb(0, 0, 0);
+  font-size: 2rem;
+  outline: none;
+}
+
+.editable-text {
+  font-size: 2rem;
+  color: #040303;
+  cursor: pointer;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.placeholder {
+  color: rgb(0, 0, 0);
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.pencil-icon {
+  width: 35px;
+  height: 35px;
+  transition: transform 0.2s;
+}
+.pencil-ico:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
 .top-left-label {
   position: fixed;
-  top: 2rem;
+  top: 7rem;
   left: 1rem;
   background-color: transparent;
   color: #f065b6;
@@ -28,7 +73,7 @@
 
 .top-left-label2 {
   position: fixed;
-  top: 5rem;
+  top: 10rem;
   left: 2rem;
   background-color: transparent;
   color: #f065b6;
@@ -40,7 +85,7 @@
 
 .players-list {
   position: fixed;
-  top: 7rem;
+  top: 11rem;
   left: 2rem;
   background-color: transparent;
   color: #040404;

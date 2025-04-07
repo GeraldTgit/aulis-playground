@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import './App.css';
 import DraggableNet from './components/DraggableNet';
-import Butterfly from './components/Butterfly';
+import Butterfly from './components/Butterfly'; 
 
 function App() {
   const [showPopup, setShowPopup] = useState(false);
@@ -13,6 +13,8 @@ function App() {
   const butterflyRef = useRef(null);
   const netRef = useRef(null);
   const cageRef = useRef(null);
+  const [name, setName] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   // Fetch players' data from the backend
   useEffect(() => {
@@ -71,7 +73,41 @@ function App() {
 
   return (
     <div className="App">
-      <div className="top-left-label">Auli's Playmates</div>
+      <div className="editable-label">
+        {isEditing ? (
+          <>
+            <input
+              autoFocus
+              type="text"
+              placeholder="Input your name here"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="editable-input"
+            />
+            <img
+              src={`${process.env.PUBLIC_URL}/images/save.png`}
+              alt="Save"
+              className="pencil-icon"
+              onClick={() => setIsEditing(false)}
+              style={{ cursor: 'pointer' }}
+            />
+          </>
+        ) : (
+          <>
+            <span onClick={() => setIsEditing(true)} className="editable-text">
+              {name ? `Hello ${name}!` : <span className="placeholder">Input your name here..</span>}
+            </span>
+            <img
+              src={`${process.env.PUBLIC_URL}/images/pencil.png`}
+              alt="Edit"
+              className="pencil-icon"
+              onClick={() => setIsEditing(true)}
+              style={{ cursor: 'pointer' }}
+            />
+          </>
+        )}
+      </div>
+      <div className="top-left-label">Auliria's Playmates</div>
       <div className="top-left-label2">Top 10 butterfly catchers yey!</div>
       <div className="cartoon_butterfly"></div>
       <div 

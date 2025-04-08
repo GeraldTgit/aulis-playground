@@ -1,0 +1,244 @@
+.App {
+  background-image: url("/public/images/garden.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation; /* Improve touch responsiveness */
+}
+
+.editable-label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 2rem;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  padding: 8px 16px;
+  border: 2px solid #ff9800;
+  border-radius: 2rem;
+
+  background-color: rgba(255, 255, 255, 0.7); /* Optional soft background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional soft shadow */
+}
+
+.editable-input {
+  border: none;
+  border-bottom: 1px solid rgb(0, 0, 0);
+  font-size: 2rem;
+  outline: none;
+}
+
+.editable-text {
+  font-size: 2rem;
+  color: #040303;
+  cursor: pointer;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.placeholder {
+  color: rgb(0, 0, 0);
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.pencil-icon {
+  width: 35px;
+  height: 35px;
+  transition: transform 0.2s;
+}
+.pencil-ico:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+.top-left-label {
+  position: fixed;
+  top: 7rem;
+  left: 1rem;
+  color: #f065b6;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 2rem;
+  z-index: 1000;
+}
+
+.top-left-label2 {
+  position: fixed;
+  top: 10rem;
+  left: 2rem;
+  color: #f065b6;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 1rem;
+  z-index: 1000;
+}
+
+.players-list {
+  position: fixed;
+  top: 12rem;
+  left: 2rem;
+  color: #040404;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 1rem;
+  z-index: 1000;
+}
+
+.player-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;
+}
+
+.players {
+  padding: 0.2rem 0.5rem;
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+  .players {
+    top: 4rem;
+    left: 1rem;
+    font-size: 0.5rem;
+  }
+}
+
+.cage {
+  background-image: url("/public/images/cage.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 100px; /* Smaller for mobile */
+  height: 150px; /* Smaller for mobile */
+  position: fixed;
+  top: 7rem;
+  right: 1.5rem;
+  z-index: 80;
+  transition: transform 0.2s;
+}
+
+.cage:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+.cartoon_butterfly {
+  background-image: url("/public/images/butterfly.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 40px; /* Smaller for mobile */
+  height: 40px; /* Smaller for mobile */
+  position: fixed;
+  top: 13rem;
+  right: 3.5rem;
+  z-index: 70;
+  animation: wiggle-pulse 3s infinite ease-in-out;
+}
+
+/* Butterfly Counter Styles */
+.butterfly-counter {
+  position: fixed;
+  top: 4rem;
+  right: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 8px 12px; /* Smaller for mobile */
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+  border: 2px solid #ff9800;
+}
+
+.counter-number {
+  font-size: 20px; /* Smaller for mobile */
+  font-weight: bold;
+  color: #ff5722;
+}
+
+.counter-label {
+  font-size: 10px; /* Smaller for mobile */
+  color: #555;
+  margin-top: 2px;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .cage {
+    width: 120px;
+    height: 120px;
+  }
+
+  .cage-count {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+  }
+
+  .cartoon_butterfly {
+    width: 30px;
+    height: 30px;
+    right: 60px;
+    bottom: 15px;
+  }
+
+  .butterfly-counter {
+    bottom: 100px;
+    right: 30px;
+    padding: 5px 10px;
+  }
+
+  .counter-number {
+    font-size: 18px;
+  }
+
+  .counter-label {
+    font-size: 9px;
+  }
+
+  .popup-image {
+    max-width: 50%;
+    max-height: 50%;
+    animation: bounceIn 0.5s;
+  }
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes wiggle-pulse {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(5deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(-5deg) scale(1);
+  }
+  75% {
+    transform: rotate(5deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}

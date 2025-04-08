@@ -1,22 +1,24 @@
 {
-    "builds": [
-      {
-        "src": "backend/*",
-        "use": "@railway/python"
-      },
-      {
-        "src": "frontend/*",
-        "use": "@railway/static"
+  "builds": [
+    {
+      "src": "backend",
+      "use": "@railway/python",
+      "config": {
+        "installCommand": "pip install -r requirements.txt"
       }
-    ],
-    "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "/backend/$1"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "/frontend"
+    },
+    {
+      "src": "frontend",
+      "use": "@railway/node",
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "startCommand": "npm run start"
       }
-    ]
-  }
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/backend/$1" },
+    { "src": "/(.*)", "dest": "/frontend" }
+  ]
+}

@@ -1,39 +1,65 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import './App.css';
 import DraggableNet from './components/DraggableNet';
-import Butterfly from './components/Butterfly'; 
+import Butterfly from './components/Butterfly';
 
 function App() {
+  // State management
   const [showPopup, setShowPopup] = useState(false);
   const [caughtCount, setCaughtCount] = useState(0);
   const [butterflyKey, setButterflyKey] = useState(0);
   const [releasedButterflies, setReleasedButterflies] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [players, setPlayers] = useState([]); // State to store player data
+  const [players, setPlayers] = useState([]);
+  const [name, setName] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Refs
   const butterflyRef = useRef(null);
   const netRef = useRef(null);
   const cageRef = useRef(null);
-  const [name, setName] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch players' data from the backend
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log('Fetched data:', data);  // Log the data to check the structure
-        setPlayers(data.data); // Set the player data in state
-      } catch (error) {
-        console.error('Error fetching player data:', error);
+  // API endpoints
+  const API_BASE = 'http://localhost:8000';
+  const LEADERBOARD_URL = `${API_BASE}/`;
+  const SAVE_SESSION_URL = `${API_BASE}/save-session`;
+
+  // Fetch leaderboard data
+  const fetchPlayers = useCallback(async () => {
+    try {
+      setError(null);
+      const response = await fetch(LEADERBOARD_URL);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-    fetchPlayers();
+
+      const data = await response.json();
+      
+      // Handle different response formats
+      let playersData = [];
+      if (Array.isArray(data)) {
+        playersData = data;
+      } else if (data && Array.isArray(data.data)) {
+        playersData = data.data;
+      }
+
+      setPlayers(playersData);
+    } catch (err) {
+      console.error('Failed to fetch players:', err);
+      setError('Failed to load leaderboard');
+      setPlayers([]);
+    }
   }, []);
 
+  // Initial data load
+  useEffect(() => {
+    fetchPlayers();
+  }, [fetchPlayers]);
+
+  // Mobile detection
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -44,6 +70,41 @@ function App() {
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+  // Save session to backend
+  const saveSession = useCallback(async () => {
+    if (!name || caughtCount === 0) return;
+    
+    setIsSaving(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(SAVE_SESSION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: name,
+          caught_butterflies: caughtCount
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const updatedLeaderboard = Array.isArray(result.leaderboard) ? result.leaderboard : [];
+      setPlayers(updatedLeaderboard);
+    } catch (err) {
+      console.error('Failed to save session:', err);
+      setError('Failed to save your score');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [name, caughtCount]);
+
+  // Handle butterfly catch
   const handleCatch = useCallback(() => {
     if (!showPopup) {
       setShowPopup(true);
@@ -55,24 +116,44 @@ function App() {
     }
   }, [showPopup]);
 
+  // Release butterflies from cage position with natural animation
   const releaseButterflies = useCallback(() => {
-    if (caughtCount === 0) return;
+    if (caughtCount === 0 || !cageRef.current) return;
     
-    const newButterflies = [];
-    for (let i = 0; i < caughtCount; i++) {
-      newButterflies.push({
+    saveSession();
+    
+    // Get cage position and dimensions
+    const cageRect = cageRef.current.getBoundingClientRect();
+    const startX = cageRect.left + cageRect.width / 2;
+    const startY = cageRect.top + cageRect.height / 2;
+    
+    // Create butterflies with natural flight patterns
+    const newButterflies = Array.from({ length: caughtCount }, (_, i) => {
+      // Random angle for flight direction
+      const angle = Math.random() * Math.PI * 2;
+      // Random speed between 2-5
+      const speed = 2 + Math.random() * 3;
+      
+      return {
         id: Date.now() + i,
-        x: window.innerWidth - (isMobile ? 80 : 100),
-        y: window.innerHeight - (isMobile ? 80 : 100)
-      });
-    }
+        initialPosition: { 
+          x: startX + (Math.random() - 0.5) * 30, // Small random offset from center
+          y: startY + (Math.random() - 0.5) * 30
+        },
+        initialVelocity: {
+          x: Math.cos(angle) * speed,
+          y: Math.sin(angle) * speed
+        }
+      };
+    });
     
     setReleasedButterflies(newButterflies);
     setCaughtCount(0);
-  }, [caughtCount, isMobile]);
+  }, [caughtCount, saveSession]);
 
   return (
     <div className="App">
+      {/* Header Section */}
       <div className="editable-label">
         {isEditing ? (
           <>
@@ -81,8 +162,9 @@ function App() {
               type="text"
               placeholder="Input your name here"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.slice(0, 20))}
               className="editable-input"
+              maxLength="20"
             />
             <img
               src={`${process.env.PUBLIC_URL}/images/save.png`}
@@ -95,7 +177,7 @@ function App() {
         ) : (
           <>
             <span onClick={() => setIsEditing(true)} className="editable-text">
-              {name ? `Hello ${name}!` : <span className="placeholder">Input your name here..</span>}
+              {name ? `Hello ${name}!` : <span className="placeholder">Click to add your name</span>}
             </span>
             <img
               src={`${process.env.PUBLIC_URL}/images/pencil.png`}
@@ -107,20 +189,31 @@ function App() {
           </>
         )}
       </div>
+
       <div className="top-left-label">Auliria's Playmates</div>
-      <div className="top-left-label2">Top 10 butterfly catchers yey!</div>
+      <div className="top-left-label2">Top 10 butterfly catchers!</div>
+
+      {/* Game Elements */}
       <div className="cartoon_butterfly"></div>
+      
       <div 
         className="cage" 
         ref={cageRef}
         onClick={releaseButterflies}
-        style={{ cursor: 'pointer' }}
-      ></div>
+        style={{ cursor: caughtCount > 0 ? 'pointer' : 'default' }}
+      >
+        {isSaving && <div className="saving-indicator">Saving...</div>}
+        {caughtCount > 0 && (
+          <div className="cage-count">{caughtCount}</div>
+        )}
+      </div>
+      
       <div className="butterfly-counter">
         <span className="counter-number">{caughtCount}</span>
         <span className="counter-label">Butterflies Caught</span>
       </div>
       
+      {/* Popup */}
       {showPopup && (
         <div className="popup-overlay">
           <img 
@@ -131,12 +224,15 @@ function App() {
         </div>
       )}
       
+      {/* Main butterfly to catch */}
       <Butterfly key={butterflyKey} ref={butterflyRef} />
       
+      {/* Released butterflies */}
       {releasedButterflies.map((butterfly) => (
         <Butterfly 
           key={butterfly.id}
-          initialPosition={{ x: butterfly.x, y: butterfly.y }}
+          initialPosition={butterfly.initialPosition}
+          initialVelocity={butterfly.initialVelocity}
         />
       ))}
       
@@ -146,15 +242,22 @@ function App() {
         onCatch={handleCatch} 
       />
 
-      {/* Display player data */}
+      {/* Leaderboard */}
       <div className="players-list">
         <div className="player-data">
-          {players.length === 0 ? (
-            <p>Loading player data...</p>
+          {error ? (
+            <p className="error-message">{error}</p>
+          ) : players.length === 0 ? (
+            <p>No players yet. Be the first!</p>
           ) : (
             players.map((player, index) => (
-              <div key={index} className="players">
-                {player.username} — {player.caught_butterflies} <span role="img" aria-label="butterflies">🦋</span>
+              <div key={`${player.username} - ${index}`} className="player">
+                <span className="player-rank">{index + 1}.</span>
+                <span className="player-name">{player.username || 'Anonymous'}</span>
+                <span className="player-score">
+                  {' '}—{' '} {/* Added space-dash-space separator */}
+                  {player.caught_butterflies || 0} <span role="img" aria-label="butterflies">🦋</span>
+                </span>
               </div>
             ))
           )}

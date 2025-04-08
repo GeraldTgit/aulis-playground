@@ -1,71 +1,74 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from dotenv import load_dotenv
 import os
+from pydantic import BaseModel
 
-# Initialize FastAPI app
-app = FastAPI()
-
-# Add CORS middleware to allow frontend access from different origins
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow only the React frontend
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
-)
-
-# Load environment variables
 load_dotenv()
 
-# Fetch variables
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
+app = FastAPI()
 
-def connect_to_database():
-    try:
-        # Connect to the database
-        connection = psycopg2.connect(
-            user=USER,
-            password=PASSWORD,
-            host=HOST,
-            port=PORT,
-            dbname=DBNAME
-        )
-        print("✅ Connected!")
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React's default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        # Create cursor
-        cursor = connection.cursor()
-        
-        # Read SQL query from file
-        with open("top_players.sql", "r") as file:
-            query = file.read()
-        
-        cursor.execute(query)
-        connection.commit()
+class SessionData(BaseModel):
+    username: str
+    caught_butterflies: int
 
-        rows = cursor.fetchall()
-
-        # Format the result to return only the username and caught_butterflies columns
-        result = [{"username": row[0], "caught_butterflies": row[1]} for row in rows]
-
-        print(result)
-
-        cursor.close()
-        connection.close()
-        print("🔌 Connection closed.")
-        return result
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return str(e)
+def get_db_connection():
+    return psycopg2.connect(
+        user=os.getenv("user"),
+        password=os.getenv("password"),
+        host=os.getenv("host"),
+        port=os.getenv("port"),
+        dbname=os.getenv("dbname")
+    )
 
 @app.get("/")
-async def read_root():
-    # Call the function to connect to the database and execute the query
-    result = connect_to_database()
-    return {"message": "Welcome to Auli's Playmates!", "data": result}
+async def get_players():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT username, caught_butterflies FROM sessions ORDER BY caught_butterflies DESC LIMIT 10")
+        players = cur.fetchall()
+        return {"data": [{"username": row[0], "caught_butterflies": row[1]} for row in players]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()
+
+@app.post("/save-session")
+async def save_session(session_data: SessionData):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get next ID
+        cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM sessions;")
+        next_id = cur.fetchone()[0]
+        
+        # Insert new session
+        cur.execute("""
+            INSERT INTO sessions (id, username, caught_butterflies, session_dt)
+            VALUES (%s, %s, %s, NOW())
+        """, (next_id, session_data.username, session_data.caught_butterflies))
+        
+        conn.commit()
+        return {"message": "Session saved successfully", "id": next_id}
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()

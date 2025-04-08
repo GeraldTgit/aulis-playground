@@ -61,13 +61,9 @@
   position: fixed;
   top: 7rem;
   left: 1rem;
-  background-color: transparent;
   color: #f065b6;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
   font-family: "Comic Sans MS", cursive, sans-serif;
   font-size: 2rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
@@ -75,23 +71,19 @@
   position: fixed;
   top: 10rem;
   left: 2rem;
-  background-color: transparent;
   color: #f065b6;
   font-family: "Comic Sans MS", cursive, sans-serif;
   font-size: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
 .players-list {
   position: fixed;
-  top: 11rem;
+  top: 12rem;
   left: 2rem;
-  background-color: transparent;
   color: #040404;
   font-family: "Comic Sans MS", cursive, sans-serif;
   font-size: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
@@ -118,11 +110,11 @@
   background-image: url("/public/images/cage.png");
   background-size: contain;
   background-repeat: no-repeat;
-  width: 150px; /* Smaller for mobile */
+  width: 100px; /* Smaller for mobile */
   height: 150px; /* Smaller for mobile */
   position: fixed;
-  right: 1px;
-  bottom: 0px;
+  top: 7rem;
+  right: 1.5rem;
   z-index: 80;
   transition: transform 0.2s;
 }
@@ -139,8 +131,8 @@
   width: 40px; /* Smaller for mobile */
   height: 40px; /* Smaller for mobile */
   position: fixed;
-  right: 80px; /* Adjusted for mobile */
-  bottom: 20px; /* Adjusted for mobile */
+  top: 13rem;
+  right: 3.5rem;
   z-index: 70;
   animation: wiggle-pulse 3s infinite ease-in-out;
 }
@@ -148,8 +140,8 @@
 /* Butterfly Counter Styles */
 .butterfly-counter {
   position: fixed;
-  bottom: 120px; /* Adjusted for mobile */
-  right: 50px; /* Adjusted for mobile */
+  top: 4rem;
+  right: 1.5rem;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 8px 12px; /* Smaller for mobile */
   border-radius: 20px;
@@ -178,6 +170,17 @@
   .cage {
     width: 120px;
     height: 120px;
+  }
+
+  .cage-count {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
   }
 
   .cartoon_butterfly {

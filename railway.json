@@ -1,0 +1,22 @@
+{
+    "builds": [
+      {
+        "src": "backend/*",
+        "use": "@railway/python"
+      },
+      {
+        "src": "frontend/*",
+        "use": "@railway/static"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "/backend/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/frontend"
+      }
+    ]
+  }

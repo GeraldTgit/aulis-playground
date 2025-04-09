@@ -9,7 +9,6 @@ function App() {
   const [caughtCount, setCaughtCount] = useState(0);
   const [butterflyKey, setButterflyKey] = useState(0);
   const [releasedButterflies, setReleasedButterflies] = useState([]);
-  const [isMobile, setIsMobile] = useState(false);
   const [players, setPlayers] = useState([]);
   const [name, setName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -52,23 +51,12 @@ function App() {
       setError('Failed to load leaderboard');
       setPlayers([]);
     }
-  }, []);
+  }, [LEADERBOARD_URL]); // Added LEADERBOARD_URL as dependency
 
   // Initial data load
   useEffect(() => {
     fetchPlayers();
   }, [fetchPlayers]);
-
-  // Mobile detection
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
 
   // Save session to backend
   const saveSession = useCallback(async () => {
@@ -102,7 +90,7 @@ function App() {
     } finally {
       setIsSaving(false);
     }
-  }, [name, caughtCount]);
+  }, [name, caughtCount, SAVE_SESSION_URL]); // Added SAVE_SESSION_URL as dependency
 
   // Handle butterfly catch
   const handleCatch = useCallback(() => {

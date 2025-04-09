@@ -21,7 +21,7 @@ function App() {
   const cageRef = useRef(null);
 
   // API endpoints
-  const API_BASE = 'http://localhost:8000';
+  const API_BASE = process.env.REACT_APP_API_BASE;
   const LEADERBOARD_URL = `${API_BASE}/`;
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
 

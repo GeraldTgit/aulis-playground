@@ -21,7 +21,7 @@ function App() {
   const cageRef = useRef(null);
 
   // API endpoints (keeping existing variable names)
-  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
+  const API_BASE = process.env.REACT_APP_API_BASE;
   const LEADERBOARD_URL = `${API_BASE}/`;
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
 
@@ -71,6 +71,27 @@ function App() {
       // Cleanup if needed
     };
   }, [fetchPlayers]);
+
+  // Backend health check
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/health`);
+        const result = await response.json();
+  
+        if (!response.ok || result.status !== "healthy") {
+          throw new Error("Backend is unhealthy");
+        }
+  
+        console.log("✅ Backend healthy:", result);
+      } catch (err) {
+        console.error("❌ Backend health check failed:", err);
+        setError("Unable to connect to backend. Please try again later.");
+      }
+    };
+  
+    checkHealth();
+  }, [API_BASE]);  
 
   // Enhanced saveSession with better error handling
   const saveSession = useCallback(async () => {

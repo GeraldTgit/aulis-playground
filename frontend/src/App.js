@@ -20,19 +20,34 @@ function App() {
   const netRef = useRef(null);
   const cageRef = useRef(null);
 
-  // API endpoints
-  const API_BASE = process.env.REACT_APP_API_BASE;
+  // API endpoints - with fallback for local development
+  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
   const LEADERBOARD_URL = `${API_BASE}/`;
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
 
-  // Fetch leaderboard data
+  // Check if API_BASE is configured
+  useEffect(() => {
+    if (!process.env.REACT_APP_API_BASE) {
+      console.warn("REACT_APP_API_BASE is not set. Using fallback URL:", API_BASE);
+    }
+  }, [API_BASE]);
+
+  // Fetch leaderboard data with improved error handling
   const fetchPlayers = useCallback(async () => {
     try {
+      if (!API_BASE) {
+        throw new Error("Backend service URL is not configured");
+      }
+
       setError(null);
-      const response = await fetch(LEADERBOARD_URL);
+      const response = await fetch(LEADERBOARD_URL, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -48,17 +63,17 @@ function App() {
       setPlayers(playersData);
     } catch (err) {
       console.error('Failed to fetch players:', err);
-      setError('Failed to load leaderboard');
+      setError(err.message || 'Failed to load leaderboard');
       setPlayers([]);
     }
-  }, [LEADERBOARD_URL]); // Added LEADERBOARD_URL as dependency
+  }, [LEADERBOARD_URL, API_BASE]);
 
   // Initial data load
   useEffect(() => {
     fetchPlayers();
   }, [fetchPlayers]);
 
-  // Save session to backend
+  // Save session to backend with improved error handling
   const saveSession = useCallback(async () => {
     if (!name || caughtCount === 0) return;
     
@@ -66,6 +81,10 @@ function App() {
     setError(null);
     
     try {
+      if (!API_BASE) {
+        throw new Error("Backend service URL is not configured");
+      }
+
       const response = await fetch(SAVE_SESSION_URL, {
         method: 'POST',
         headers: {
@@ -78,19 +97,21 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const result = await response.json();
       const updatedLeaderboard = Array.isArray(result.leaderboard) ? result.leaderboard : [];
       setPlayers(updatedLeaderboard);
+      return result; // Return the result for releaseButterflies
     } catch (err) {
       console.error('Failed to save session:', err);
-      setError('Failed to save your score');
+      setError(err.message || 'Failed to save your score');
+      throw err; // Re-throw for releaseButterflies
     } finally {
       setIsSaving(false);
     }
-  }, [name, caughtCount, SAVE_SESSION_URL]); // Added SAVE_SESSION_URL as dependency
+  }, [name, caughtCount, SAVE_SESSION_URL, API_BASE]);
 
   // Handle butterfly catch
   const handleCatch = useCallback(() => {
@@ -105,38 +126,40 @@ function App() {
   }, [showPopup]);
 
   // Release butterflies from cage position with natural animation
-  const releaseButterflies = useCallback(() => {
+  const releaseButterflies = useCallback(async () => {
     if (caughtCount === 0 || !cageRef.current) return;
     
-    saveSession();
-    
-    // Get cage position and dimensions
-    const cageRect = cageRef.current.getBoundingClientRect();
-    const startX = cageRect.left + cageRect.width / 2;
-    const startY = cageRect.top + cageRect.height / 2;
-    
-    // Create butterflies with natural flight patterns
-    const newButterflies = Array.from({ length: caughtCount }, (_, i) => {
-      // Random angle for flight direction
-      const angle = Math.random() * Math.PI * 2;
-      // Random speed between 2-5
-      const speed = 2 + Math.random() * 3;
+    try {
+      await saveSession();
       
-      return {
-        id: Date.now() + i,
-        initialPosition: { 
-          x: startX + (Math.random() - 0.5) * 30, // Small random offset from center
-          y: startY + (Math.random() - 0.5) * 30
-        },
-        initialVelocity: {
-          x: Math.cos(angle) * speed,
-          y: Math.sin(angle) * speed
-        }
-      };
-    });
-    
-    setReleasedButterflies(newButterflies);
-    setCaughtCount(0);
+      // Get cage position and dimensions
+      const cageRect = cageRef.current.getBoundingClientRect();
+      const startX = cageRect.left + cageRect.width / 2;
+      const startY = cageRect.top + cageRect.height / 2;
+      
+      // Create butterflies with natural flight patterns
+      const newButterflies = Array.from({ length: caughtCount }, (_, i) => {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 3;
+        
+        return {
+          id: Date.now() + i,
+          initialPosition: { 
+            x: startX + (Math.random() - 0.5) * 30,
+            y: startY + (Math.random() - 0.5) * 30
+          },
+          initialVelocity: {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+          }
+        };
+      });
+      
+      setReleasedButterflies(newButterflies);
+      setCaughtCount(0);
+    } catch (err) {
+      console.error('Error in releaseButterflies:', err);
+    }
   }, [caughtCount, saveSession]);
 
   return (
@@ -239,11 +262,11 @@ function App() {
             <p>No players yet. Be the first!</p>
           ) : (
             players.map((player, index) => (
-              <div key={`${player.username} - ${index}`} className="player">
+              <div key={`${player.username}-${index}`} className="player">
                 <span className="player-rank">{index + 1}.</span>
                 <span className="player-name">{player.username || 'Anonymous'}</span>
                 <span className="player-score">
-                  {' '}—{' '} {/* Added space-dash-space separator */}
+                  {' '}—{' '}
                   {player.caught_butterflies || 0} <span role="img" aria-label="butterflies">🦋</span>
                 </span>
               </div>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from dotenv import load_dotenv
@@ -85,6 +85,9 @@ async def save_session(session_data: SessionData):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Add debug logging
+        logger.info(f"Attempting to save session: {session_data}")
+        
         cur.execute("""
             INSERT INTO sessions (username, caught_butterflies, session_dt)
             VALUES (%s, %s, %s)
@@ -149,3 +152,14 @@ async def health_check():
                 "error": str(e)
             }
         )
+        
+# WebSocket endpoint
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Message received: {data}")
+    except WebSocketDisconnect:
+        print("Client disconnected")

@@ -90,7 +90,7 @@ function App() {
       }
     };
   
-    checkHealth();
+    checkHealth(); 
   }, [API_BASE]);  
 
   // Enhanced saveSession with better error handling
@@ -110,7 +110,11 @@ function App() {
         })
       });
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Full error response:', errorData);
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
       
       const result = await response.json();
       const updatedLeaderboard = Array.isArray(result.leaderboard) ? result.leaderboard : [];

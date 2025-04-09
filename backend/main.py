@@ -5,15 +5,20 @@ from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
 from datetime import datetime
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 app = FastAPI()
 
-# Enhanced CORS configuration
+# CORS configuration (keeping your existing variable names)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
+    allow_origins=["*"],  # Keeping your existing wildcard
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,15 +31,16 @@ class SessionData(BaseModel):
 def get_db_connection():
     try:
         conn = psycopg2.connect(
-            user=os.getenv("user"),
+            user=os.getenv("user"),  # Keeping your existing variable name
             password=os.getenv("password"),
             host=os.getenv("host"),
             port=os.getenv("port"),
-            dbname=os.getenv("dbname")
+            dbname=os.getenv("dbname"),
+            sslmode="require" if os.getenv("RAILWAY_ENVIRONMENT") == "production" else None
         )
         return conn
     except Exception as e:
-        print(f"Database connection error: {str(e)}")
+        logger.error(f"Database connection error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database connection failed")
 
 @app.get("/")
@@ -60,7 +66,7 @@ async def get_players():
             ]
         }
     except Exception as e:
-        print(f"Error fetching players: {str(e)}")
+        logger.error(f"Error fetching players: {str(e)}")
         raise HTTPException(
             status_code=500, 
             detail={
@@ -79,7 +85,6 @@ async def save_session(session_data: SessionData):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Insert new session with RETURNING clause
         cur.execute("""
             INSERT INTO sessions (username, caught_butterflies, session_dt)
             VALUES (%s, %s, %s)
@@ -91,7 +96,6 @@ async def save_session(session_data: SessionData):
         ))
         
         new_id = cur.fetchone()[0]
-        conn.commit()
         
         # Get updated leaderboard
         cur.execute("""
@@ -101,6 +105,8 @@ async def save_session(session_data: SessionData):
             LIMIT 10
         """)
         leaderboard = cur.fetchall()
+        
+        conn.commit()
         
         return {
             "status": "success",
@@ -114,7 +120,7 @@ async def save_session(session_data: SessionData):
             ]
         }
     except Exception as e:
-        print(f"Error saving session: {str(e)}")
+        logger.error(f"Error saving session: {str(e)}")
         if conn:
             conn.rollback()
         raise HTTPException(
@@ -130,4 +136,16 @@ async def save_session(session_data: SessionData):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now()}
+    try:
+        conn = get_db_connection()
+        conn.close()
+        return {"status": "healthy", "timestamp": datetime.now()}
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "error": str(e)
+            }
+        )

@@ -1,7 +1,7 @@
 {
   "name": "aulis-playground",
   "version": "0.1.0",
-  "homepage": "https://GeraldTgit.github.io/aulis-playground/",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -11,16 +11,14 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-scripts": "5.0.1",
+    "serve": "^14.2.0",
     "web-vitals": "^2.1.4"
   },
- "scripts": {
-  "start": "react-scripts start",         
-  "build": "react-scripts build",         
-  "prod:start": "serve -s build -l 3000", 
-  "test": "react-scripts test",
-  "eject": "react-scripts eject",
-  "dev": "react-scripts start"            
-},
+  "scripts": {
+  "start": "cross-env serve -s build -l $PORT",
+  "build": "react-scripts build",
+  "dev": "react-scripts start"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -40,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "gh-pages": "^6.3.0"
   }
 }

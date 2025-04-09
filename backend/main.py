@@ -26,12 +26,11 @@ class SessionData(BaseModel):
 def get_db_connection():
     try:
         conn = psycopg2.connect(
-            user=os.getenv("PGUSER"),
-            password=os.getenv("PGPASSWORD"),
-            host=os.getenv("PGHOST"),
-            port=os.getenv("PGPORT"),
-            dbname=os.getenv("PGDATABASE"),
-            sslmode="require" if os.getenv("RAILWAY_ENVIRONMENT") == "production" else None
+            user=os.getenv("user"),
+            password=os.getenv("password"),
+            host=os.getenv("host"),
+            port=os.getenv("port"),
+            dbname=os.getenv("dbname")
         )
         return conn
     except Exception as e:

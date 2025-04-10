@@ -2,30 +2,33 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import "./App.css";
 import DraggableNet from "./components/DraggableNet";
 import Butterfly from "./components/Butterfly";
+import confetti from "canvas-confetti";
 
 function App() {
-  // State management (keeping all existing variables)
-  const [showPopup, setShowPopup] = useState(false);
-  const [caughtCount, setCaughtCount] = useState(0);
-  const [butterflyKey, setButterflyKey] = useState(0);
-  const [releasedButterflies, setReleasedButterflies] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [name, setName] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState(null);
+  // State management
+  const [showPopup, setShowPopup] = useState(false); // Controls popup visibility
+  const [caughtCount, setCaughtCount] = useState(0); // Tracks caught butterflies
+  const [butterflyKey, setButterflyKey] = useState(0); // Key to reset butterfly
+  const [releasedButterflies, setReleasedButterflies] = useState([]); // Stores released butterflies
+  const [players, setPlayers] = useState([]); // Leaderboard data
+  const [name, setName] = useState(""); // Player name
+  const [isEditing, setIsEditing] = useState(false); // Name edit mode
+  const [isSaving, setIsSaving] = useState(false); // Saving state
+  const [error, setError] = useState(null); // Error messages
 
-  // Refs (keeping existing refs)
-  const butterflyRef = useRef(null);
-  const netRef = useRef(null);
-  const cageRef = useRef(null);
+  // Refs for DOM elements
+  const butterflyRef = useRef(null); // Reference to butterfly component
+  const netRef = useRef(null); // Reference to net component
+  const cageRef = useRef(null); // Reference to cage element
 
-  // API endpoints (keeping existing variable names)
+  // API configuration
   const API_BASE = process.env.REACT_APP_API_BASE;
   const LEADERBOARD_URL = `${API_BASE}/`;
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
 
-  // Enhanced connection check
+  /**
+   * Checks if API base URL is configured
+   */
   useEffect(() => {
     if (!process.env.REACT_APP_API_BASE) {
       console.warn(
@@ -35,7 +38,9 @@ function App() {
     }
   }, [API_BASE]);
 
-  // Enhanced fetchPlayers with retry logic
+  /**
+   * Fetches leaderboard data with retry logic
+   */
   const fetchPlayers = useCallback(async () => {
     try {
       setError(null);
@@ -48,7 +53,7 @@ function App() {
 
       const data = await response.json();
 
-      // Handle response formats (keeping existing logic)
+      // Handle different response formats
       let playersData = [];
       if (Array.isArray(data)) {
         playersData = data;
@@ -61,13 +66,11 @@ function App() {
       console.error("Failed to fetch players:", err);
       setError(err.message || "Failed to load leaderboard");
       setPlayers([]);
-
-      // Auto-retry after 5 seconds
-      setTimeout(fetchPlayers, 5000);
+      setTimeout(fetchPlayers, 5000); // Retry after 5 seconds
     }
   }, [LEADERBOARD_URL]);
 
-  // Initial data load with cleanup
+  // Initial data load
   useEffect(() => {
     fetchPlayers();
     return () => {
@@ -75,7 +78,9 @@ function App() {
     };
   }, [fetchPlayers]);
 
-  // Backend health check
+  /**
+   * Checks backend health status
+   */
   useEffect(() => {
     const checkHealth = async () => {
       try {
@@ -96,7 +101,9 @@ function App() {
     checkHealth();
   }, [API_BASE]);
 
-  // Enhanced saveSession with better error handling
+  /**
+   * Saves the current game session to the backend
+   */
   const saveSession = useCallback(async () => {
     if (!name || caughtCount === 0) return;
 
@@ -115,7 +122,6 @@ function App() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Full error response:", errorData);
         throw new Error(
           errorData.message || `Server error: ${response.status}`
         );
@@ -136,8 +142,12 @@ function App() {
     }
   }, [name, caughtCount, SAVE_SESSION_URL]);
 
-  // [Rest of your existing functions remain unchanged...]
-  // Handle butterfly catch
+  /**
+   * Handles butterfly catch event
+   * - Shows popup
+   * - Increments counter
+   * - Resets butterfly after delay
+   */
   const handleCatch = useCallback(() => {
     if (!showPopup) {
       setShowPopup(true);
@@ -149,12 +159,31 @@ function App() {
     }
   }, [showPopup]);
 
-  // Release butterflies from cage position with natural animation
+  /**
+   * Releases all caught butterflies from the cage
+   * - Saves session first
+   * - Creates new butterfly instances with random flight patterns
+   */
   const releaseButterflies = useCallback(async () => {
     if (caughtCount === 0 || !cageRef.current) return;
 
     try {
       await saveSession();
+
+      // Trigger confetti explosion
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: [
+          "#ff0000",
+          "#00ff00",
+          "#0000ff",
+          "#ffff00",
+          "#ff00ff",
+          "#00ffff",
+        ],
+      });
 
       // Extra null check just before using the ref
       if (!cageRef.current) {
@@ -162,12 +191,12 @@ function App() {
         return;
       }
 
-      // Get cage position and dimensions
+      // Calculate release position from cage center
       const cageRect = cageRef.current.getBoundingClientRect();
       const startX = cageRect.left + cageRect.width / 2;
       const startY = cageRect.top + cageRect.height / 2;
 
-      // Create butterflies with natural flight patterns
+      // Create new butterflies with random flight patterns
       const newButterflies = Array.from({ length: caughtCount }, (_, i) => {
         const angle = Math.random() * Math.PI * 2;
         const speed = 2 + Math.random() * 3;
@@ -194,11 +223,12 @@ function App() {
 
   return (
     <div className="App">
-      {/* Connection status indicator added */}
+      {/* Connection status indicator */}
       <div className="connection-status">
         {error ? "🔴 Connection Issues" : "🟢 Connected"}
       </div>
-      {/* Header Section */}
+
+      {/* Name input/edit section */}
       <div className="editable-label">
         {isEditing ? (
           <>
@@ -239,12 +269,14 @@ function App() {
         )}
       </div>
 
+      {/* Game title and instructions */}
       <div className="top-left-label">Auliria's Playmates</div>
       <div className="top-left-label2">Top 10 butterfly catchers!</div>
 
-      {/* Game Elements */}
+      {/* Decorative butterfly image */}
       <div className="cartoon_butterfly"></div>
 
+      {/* Cage for caught butterflies */}
       <div
         className="cage"
         ref={cageRef}
@@ -252,15 +284,15 @@ function App() {
         style={{ cursor: caughtCount > 0 ? "pointer" : "default" }}
       >
         {isSaving && <div className="saving-indicator">Saving...</div>}
-        <span className="tooltiptext">Open the cage 🦋</span>
+        <span className="tooltiptext">Open the cage!</span>
       </div>
 
+      {/* Caught butterflies counter */}
       <div className="butterfly-counter">
-        <span className="counter-number">{caughtCount}</span>
-        <span className="counter-label">Butterflies Caught</span>
+        <span className="counter-number">{caughtCount} 🦋</span>
       </div>
 
-      {/* Popup */}
+      {/* Catch success popup - now with responsive sizing */}
       {showPopup && (
         <div className="popup-overlay">
           <img
@@ -274,7 +306,7 @@ function App() {
       {/* Main butterfly to catch */}
       <Butterfly key={butterflyKey} ref={butterflyRef} />
 
-      {/* Released butterflies */}
+      {/* Released butterflies flying freely */}
       {releasedButterflies.map((butterfly) => (
         <Butterfly
           key={butterfly.id}
@@ -283,13 +315,14 @@ function App() {
         />
       ))}
 
+      {/* Player-controlled net */}
       <DraggableNet
         ref={netRef}
         butterflyRef={butterflyRef}
         onCatch={handleCatch}
       />
 
-      {/* Leaderboard */}
+      {/* Leaderboard display */}
       <div className="players-list">
         <div className="player-data">
           {error ? (
@@ -315,7 +348,6 @@ function App() {
           )}
         </div>
       </div>
-      {/* [Rest of your existing JSX remains exactly the same] */}
     </div>
   );
 }

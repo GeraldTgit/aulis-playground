@@ -89,7 +89,7 @@ src/
 └── index.js
 ```
 
----
+
 
 ## 📝 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
@@ -101,7 +101,6 @@ This project is licensed under the **MIT License**, which means:
 
 > It’s a very permissive and developer-friendly license.
 
----
+
 
 Created with 💖 by Gerald T.
-````

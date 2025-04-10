@@ -273,23 +273,21 @@ function App() {
       <div className="top-left-label">Auliria's Playmates</div>
       <div className="top-left-label2">Top 10 butterfly catchers!</div>
 
-      {/* Decorative butterfly image */}
-      <div className="cartoon_butterfly"></div>
-
-      {/* Cage for caught butterflies */}
-      <div
-        className="cage"
-        ref={cageRef}
-        onClick={releaseButterflies}
-        style={{ cursor: caughtCount > 0 ? "pointer" : "default" }}
-      >
-        {isSaving && <div className="saving-indicator">Saving...</div>}
-        <span className="tooltiptext">Open the cage!</span>
-      </div>
-
       {/* Caught butterflies counter */}
       <div className="butterfly-counter">
         <span className="counter-number">{caughtCount} 🦋</span>
+        {/* Cage for caught butterflies */}
+        <div
+          className="cage"
+          ref={cageRef}
+          onClick={releaseButterflies}
+          style={{ cursor: caughtCount > 0 ? "pointer" : "default" }}
+        >
+          {isSaving && <div className="saving-indicator">Saving...</div>}
+          <span className="tooltiptext">Open the cage!</span>
+        </div>
+        {/* Decorative butterfly image */}
+        <div className="cartoon_butterfly"></div>
       </div>
 
       {/* Catch success popup - now with responsive sizing */}

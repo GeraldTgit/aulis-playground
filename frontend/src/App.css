@@ -40,6 +40,12 @@
   .pencil-icon {
     width: 24px;
     height: 24px;
+    transition: transform 0.1s;
+  }
+
+  .pencil-ico:hover {
+    transform: scale(1.1);
+    cursor: pointer;
   }
 
   .top-left-label {
@@ -73,9 +79,9 @@
 .pencil-icon {
   width: 35px;
   height: 35px;
-  transition: transform 0.2s;
+  transition: transform 0.1s;
 }
-.pencil-ico:hover {
+.pencil-icon:hover {
   transform: scale(1.1);
   cursor: pointer;
 }
@@ -119,6 +125,11 @@
   padding: 0.2rem 0.5rem;
 }
 
+.connection-status {
+  bottom: 1rem;
+  color: #fff;
+}
+
 /* Adjust for smaller screens */
 @media (max-width: 768px) {
   .players {
@@ -137,7 +148,7 @@
   position: fixed;
   top: 7rem;
   right: 1.5rem;
-  z-index: 80;
+  z-index: 1000;
   transition: transform 0.2s;
 }
 
@@ -173,9 +184,9 @@
   width: 40px; /* Smaller for mobile */
   height: 40px; /* Smaller for mobile */
   position: fixed;
-  top: 13rem;
-  right: 3.5rem;
-  z-index: 70;
+  top: 7rem;
+  right: 2rem;
+  z-index: 10;
   animation: wiggle-pulse 3s infinite ease-in-out;
 }
 
@@ -212,8 +223,10 @@
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .cage {
-    width: 120px;
+    width: 70px;
     height: 120px;
+    top: 7rem;
+    right: 3.5rem;
   }
 
   .cage-count {
@@ -230,8 +243,9 @@
   .cartoon_butterfly {
     width: 30px;
     height: 30px;
-    right: 60px;
-    bottom: 15px;
+    top: 7rem;
+    right: 2rem;
+    z-index: 10;
   }
 
   .butterfly-counter {

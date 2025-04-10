@@ -1,12 +1,3 @@
-You're welcome — happy to help! Here's your updated `README.md` with:
-
-- ✅ Updated live **frontend URL**
-- 🖼️ Placeholder for a **site snapshot image**
-- 💡 All other details preserved
-
----
-
-````markdown
 # 🎮 Auli's Playground
 
 A fun butterfly-catching game built with React! Tap or click to catch butterflies, track your score, and climb the leaderboard.
@@ -15,11 +6,7 @@ A fun butterfly-catching game built with React! Tap or click to catch butterflie
 
 🔗 [Play the game here](https://aulis-playground.up.railway.app/)
 
-![Auli's Playground Screenshot](./public/images/screenshot.png)
-
-> _(Make sure to replace the image above with an actual screenshot named `screenshot.png` placed in `public/images/`.)_
-
----
+![Auli's Playground Screenshot](./frontend/public/images/screenshot.png)
 
 ## 🚀 Features
 
@@ -57,6 +44,7 @@ A fun butterfly-catching game built with React! Tap or click to catch butterflie
 git clone https://github.com/GeraldTgit/aulis-playground.git
 cd aulis-playground
 ```
+
 ````
 
 2. Install dependencies:
@@ -116,3 +104,4 @@ This project is licensed under the **MIT License**, which means:
 ---
 
 Created with 💖 by Gerald T.
+````

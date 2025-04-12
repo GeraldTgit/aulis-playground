@@ -28,11 +28,13 @@ function App() {
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
 
   // SFX
-  const sfx_coin = new Audio(
-    `${process.env.PUBLIC_URL}/sfx/super-mario-bros-coin.mp3`
+  const sfx_coinRef = useRef(
+    new Audio(`${process.env.PUBLIC_URL}/sfx/super-mario-bros-coin.mp3`)
   );
-  const sfx_yehey = new Audio(
-    `${process.env.PUBLIC_URL}/sfx/yehey-clap-sound-effect-awarding.mp3`
+  const sfx_yeheyRef = useRef(
+    new Audio(
+      `${process.env.PUBLIC_URL}/sfx/yehey-clap-sound-effect-awarding.mp3`
+    )
   );
 
   /**
@@ -159,7 +161,7 @@ function App() {
    */
   const handleCatch = useCallback(() => {
     if (!showPopup) {
-      sfx_coin.play();
+      sfx_coinRef.current.play();
       setShowPopup(true);
       setCaughtCount((prev) => prev + 1);
       setTimeout(() => {
@@ -196,7 +198,7 @@ function App() {
       });
 
       // Trigger yehey sound effect
-      sfx_yehey.play();
+      sfx_yeheyRef.current.play();
 
       // Extra null check just before using the ref
       if (!cageRef.current) {

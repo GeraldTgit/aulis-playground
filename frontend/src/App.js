@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import "./App.css";
 import DraggableNet from "./components/DraggableNet";
 import Butterfly from "./components/Butterfly";
+import AudioPlayer from "./components/AudioPlayer";
 import confetti from "canvas-confetti";
 
 function App() {
@@ -25,6 +26,14 @@ function App() {
   const API_BASE = process.env.REACT_APP_API_BASE;
   const LEADERBOARD_URL = `${API_BASE}/`;
   const SAVE_SESSION_URL = `${API_BASE}/save-session`;
+
+  // SFX
+  const sfx_coin = new Audio(
+    `${process.env.PUBLIC_URL}/sfx/super-mario-bros-coin.mp3`
+  );
+  const sfx_yehey = new Audio(
+    `${process.env.PUBLIC_URL}/sfx/yehey-clap-sound-effect-awarding.mp3`
+  );
 
   /**
    * Checks if API base URL is configured
@@ -150,6 +159,7 @@ function App() {
    */
   const handleCatch = useCallback(() => {
     if (!showPopup) {
+      sfx_coin.play();
       setShowPopup(true);
       setCaughtCount((prev) => prev + 1);
       setTimeout(() => {
@@ -184,6 +194,9 @@ function App() {
           "#00ffff",
         ],
       });
+
+      // Trigger yehey sound effect
+      sfx_yehey.play();
 
       // Extra null check just before using the ref
       if (!cageRef.current) {
@@ -223,6 +236,9 @@ function App() {
 
   return (
     <div className="App">
+      {/**Audio Player */}
+      <AudioPlayer />
+
       {/* Connection status indicator */}
       <div className="connection-status">
         {error ? "🔴 Connection Issues" : "🟢 Connected"}

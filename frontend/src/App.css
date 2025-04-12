@@ -344,3 +344,42 @@ button {
   touch-action: manipulation;
   font-size: 16px; /* prevent iOS zoom on focus */
 }
+
+/* Audio*/
+.audio-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.sound-note {
+  font-size: 0.9rem;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+.volume-slider {
+  width: 100px;
+  cursor: pointer;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}

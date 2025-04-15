@@ -4,7 +4,7 @@ A fun butterfly-catching game built with React! Tap or click to catch butterflie
 
 ## 🌐 Live Demo
 
-🔗 [Play the game here](https://aulis-playground.up.railway.app/)
+🔗 [Play the game here](https://aulis-playground.vercel.app/)
 
 ![Auli's Playground Screenshot](./frontend/public/images/screenshot.png)
 
